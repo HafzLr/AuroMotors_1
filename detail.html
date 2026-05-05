@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Detail Mobil — Auro Motors</title>
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="logo">AURO MOTORS</a>
+    <button class="nav-toggle" onclick="toggleNav()">☰</button>
+    <ul class="nav-links">
+      <li><a href="index.html">Beranda</a></li>
+      <li><a href="katalog.html">Katalog</a></li>
+      <li><a href="login.html" class="btn btn-outline btn-sm">Login</a></li>
+    </ul>
+  </div>
+</nav>
+
+<section class="container" style="padding-top:3rem">
+  <a href="katalog.html" style="display:inline-block;margin-bottom:2rem;color:var(--gold)">← Kembali ke Katalog</a>
+  <div id="detail-container">
+    <p style="text-align:center;color:var(--text-muted)">Memuat...</p>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-bottom">© 2025 Auro Motors</div>
+</footer>
+
+<script src="assets/js/main.js"></script>
+<script src="assets/js/api.js"></script>
+<script>
+(async () => {
+  const id = new URLSearchParams(location.search).get('id');
+  if (!id) { document.getElementById('detail-container').innerHTML = '<p>Mobil tidak ditemukan.</p>'; return; }
+  const m = await getMobilById(id);
+  if (!m) { document.getElementById('detail-container').innerHTML = '<p>Mobil tidak ditemukan.</p>'; return; }
+  const stokTersedia = m.stok && m.stok > 0;
+  document.title = `${m.merk} ${m.tipe} — Auro Motors`;
+  document.getElementById('detail-container').innerHTML = `
+    <div class="detail-grid">
+      <img src="${m.gambar || 'https://placehold.co/600x400/111111/FFD700'}" class="detail-image" alt="${m.merk} ${m.tipe}">
+      <div class="detail-info">
+        <span class="car-badge ${m.kondisi === 'Baru' ? 'badge-baru' : 'badge-bekas'}">${m.kondisi}</span>
+        <h1>${m.merk} ${m.tipe}</h1>
+        <p style="color:var(--text-muted)">Tahun ${m.tahun}</p>
+        <div class="detail-price">${formatRupiah(m.harga)}</div>
+        <ul class="spec-list">
+          <li><span>Merk</span><span>${m.merk}</span></li>
+          <li><span>Tipe</span><span>${m.tipe}</span></li>
+          <li><span>Tahun</span><span>${m.tahun}</span></li>
+          <li><span>Warna</span><span>${m.warna}</span></li>
+          <li><span>Kondisi</span><span>${m.kondisi}</span></li>
+          <li><span>Garansi</span><span>${m.garansi || '-'}</span></li>
+          <li><span>Supplier</span><span>${m.nama_supplier || '-'}</span></li>
+          <li><span>Stok</span><span style="color:${stokTersedia ? 'var(--gold)' : '#c0392b'}">${stokTersedia ? `Tersedia (${m.stok})` : 'Tidak tersedia'}</span></li>
+        </ul>
+        <button class="btn btn-wa" style="width:100%;padding:1rem;font-size:1rem" onclick='openWhatsApp(${JSON.stringify(m)})'>💬 Hubungi via WhatsApp</button>
+      </div>
+    </div>
+  `;
+})();
+</script>
+</body>
+</html>

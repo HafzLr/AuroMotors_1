@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auro Motors — Showroom Mobil Premium</title>
+<meta name="description" content="Showroom mobil premium baru & bekas. Mobil mewah pilihan dengan garansi resmi dan layanan terbaik.">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="logo">AURO MOTORS</a>
+    <button class="nav-toggle" onclick="toggleNav()">☰</button>
+    <ul class="nav-links">
+      <li><a href="index.html">Beranda</a></li>
+      <li><a href="katalog.html">Katalog</a></li>
+      <li><a href="#tentang">Tentang</a></li>
+      <li><a href="#kontak">Kontak</a></li>
+      <li><a href="login.html" class="btn btn-outline btn-sm">Login</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="hero-content">
+    <h1>Kemewahan dalam Setiap Perjalanan</h1>
+    <p class="tagline">Temukan koleksi mobil premium terbaik — baru maupun bekas berkualitas, dengan layanan eksklusif khusus untuk Anda.</p>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+      <a href="katalog.html" class="btn btn-primary">Lihat Katalog</a>
+      <a href="#tentang" class="btn btn-outline">Pelajari Lebih</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MOBIL UNGGULAN ===== -->
+<section class="container">
+  <h2 class="section-title">Mobil Unggulan</h2>
+  <p class="section-subtitle">Pilihan terbaik dari koleksi terbaru kami</p>
+  <div id="featured-cars" class="car-grid">
+    <p style="grid-column:1/-1;text-align:center;color:var(--text-muted)">Memuat data...</p>
+  </div>
+  <div style="text-align:center;margin-top:2.5rem">
+    <a href="katalog.html" class="btn btn-primary">Lihat Semua Mobil</a>
+  </div>
+</section>
+
+<!-- ===== KENAPA KAMI ===== -->
+<section id="tentang" style="background:var(--black-soft)">
+  <div class="container">
+    <h2 class="section-title">Kenapa Memilih Kami</h2>
+    <p class="section-subtitle">Pengalaman membeli mobil yang berbeda</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🏆</div>
+        <h3>Mobil Berkualitas</h3>
+        <p>Setiap mobil melalui inspeksi ketat 150+ poin sebelum dipajang di showroom kami.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🛡️</div>
+        <h3>Garansi Resmi</h3>
+        <p>Jaminan garansi resmi pabrikan untuk mobil baru, garansi mesin untuk mobil bekas.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💎</div>
+        <h3>Layanan Eksklusif</h3>
+        <p>Konsultasi personal, test drive ke lokasi Anda, dan dukungan after-sales premium.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== BARU vs BEKAS ===== -->
+<section class="container">
+  <h2 class="section-title">Mobil Baru vs Bekas</h2>
+  <p class="section-subtitle">Pilih sesuai kebutuhan Anda</p>
+  <div class="compare-grid">
+    <div class="compare-card">
+      <h3>Mobil Baru</h3>
+      <p>Mobil 0 KM langsung dari pabrik. Garansi resmi penuh, teknologi terbaru, dan kondisi sempurna.</p>
+      <a href="katalog.html?kondisi=Baru" class="btn btn-primary">Lihat Mobil Baru</a>
+    </div>
+    <div class="compare-card">
+      <h3>Mobil Bekas</h3>
+      <p>Pilihan ekonomis berkualitas. Telah lulus inspeksi 150+ poin dengan garansi mesin tertentu.</p>
+      <a href="katalog.html?kondisi=Bekas" class="btn btn-outline">Lihat Mobil Bekas</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer" id="kontak">
+  <div class="footer-grid">
+    <div>
+      <h4>AURO MOTORS</h4>
+      <p>Showroom mobil premium dengan koleksi mobil baru dan bekas terbaik di Indonesia.</p>
+    </div>
+    <div>
+      <h4>Kontak</h4>
+      <p>📍 Jl. Sudirman No. 88, Jakarta</p>
+      <p>📞 +62 822-9802-8685</p>
+      <p>✉️ info@auromotors.id</p>
+    </div>
+    <div>
+      <h4>Menu</h4>
+      <a href="index.html">Beranda</a>
+      <a href="katalog.html">Katalog</a>
+      <a href="login.html">Login Admin</a>
+    </div>
+    <div>
+      <h4>Hubungi via WhatsApp</h4>
+      <p>Konsultasi gratis dan respon cepat</p>
+      <button class="btn btn-wa" onclick="window.open('https://wa.me/'+WA_NUMBER,'_blank')" style="margin-top:0.75rem">💬 Chat Sekarang</button>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    © 2025 Auro Motors. Hak Cipta Dilindungi.
+  </div>
+</footer>
+
+<script src="assets/js/main.js"></script>
+<script src="assets/js/api.js"></script>
+<script>
+  // Muat 6 mobil unggulan
+  (async () => {
+    const data = await getMobil();
+    const featured = data.slice(0, 6);
+    document.getElementById('featured-cars').innerHTML = featured.map(renderCarCard).join('');
+  })();
+</script>
+</body>
+</html>

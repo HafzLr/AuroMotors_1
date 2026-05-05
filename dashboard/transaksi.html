@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manajemen Transaksi — Auro Motors</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/dashboard.css">
+</head>
+<body>
+<div class="dashboard-wrap">
+  <aside class="sidebar">
+    <div class="logo">AURO ADMIN</div>
+    <ul class="sidebar-menu">
+      <li><a href="index.html"><span class="icon">📊</span>Dashboard</a></li>
+      <li><a href="mobil.html"><span class="icon">🚗</span>Mobil</a></li>
+      <li><a href="pelanggan.html"><span class="icon">👥</span>Pelanggan</a></li>
+      <li><a href="transaksi.html" class="active"><span class="icon">💼</span>Transaksi</a></li>
+      <li><a href="pembayaran.html"><span class="icon">💳</span>Pembayaran</a></li>
+      <li><a href="stok.html"><span class="icon">📦</span>Stok</a></li>
+      <li><a href="sales.html"><span class="icon">🏆</span>Sales</a></li>
+      <li><a href="supplier.html"><span class="icon">🏭</span>Supplier</a></li>
+    </ul>
+    <div class="sidebar-logout">
+      <a href="#" onclick="logout();return false;"><span class="icon">🚪</span>Keluar</a>
+    </div>
+  </aside>
+  <main class="main-content">
+    <div class="dash-header">
+      <h1>💼 Manajemen Transaksi</h1>
+      <button class="btn btn-primary" onclick="openForm()">+ Tambah</button>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-header"><h3>Daftar Data</h3></div>
+      <table class="data-table" id="data-table">
+        <thead><tr><th>ID</th><th>Tanggal</th><th>Pelanggan</th><th>Sales</th><th>Total</th><th>Aksi</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL FORM -->
+<div class="modal-overlay" id="modal-form">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">Tambah Data</h3>
+      <button class="modal-close" onclick="closeModal('modal-form')">&times;</button>
+    </div>
+    <form id="form-data">
+      <div class="modal-body">
+        <div class="form-group"><label>ID Transaksi</label><input type="number" name="id_transaksi"></div><div class="form-group"><label>Tanggal</label><input type="date" name="tanggal"></div><div class="form-group"><label>Nama Pelanggan</label><input type="text" name="pelanggan"></div><div class="form-group"><label>Nama Sales</label><input type="text" name="sales"></div><div class="form-group"><label>Total Harga</label><input type="number" name="total_harga"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline btn-sm" onclick="closeModal('modal-form')">Batal</button>
+        <button type="submit" class="btn btn-primary btn-sm">Simpan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="../assets/js/main.js"></script>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/dashboard.js"></script>
+<script>
+
+const dummy_pelanggan = [
+  { id_pelanggan: 1, nama: 'Andi Wijaya', no_hp: '08123456789', jalan: 'Jl. Anggrek No.20', kota: 'Jakarta', kode_pos: '10130' },
+  { id_pelanggan: 2, nama: 'Rina Kusuma', no_hp: '08198765432', jalan: 'Jl. Kenanga No.15', kota: 'Bandung', kode_pos: '40120' },
+  { id_pelanggan: 3, nama: 'Hendra Pratama', no_hp: '08111222333', jalan: 'Jl. Sudirman No.5', kota: 'Surabaya', kode_pos: '60110' }
+];
+const dummy_trx = [
+  { id_transaksi: 1001, tanggal: '2025-05-02', pelanggan: 'Andi Wijaya', sales: 'Siti Aminah', total_harga: 450000000 },
+  { id_transaksi: 1002, tanggal: '2025-05-01', pelanggan: 'Rina Kusuma', sales: 'Siti Aminah', total_harga: 240000000 },
+  { id_transaksi: 1003, tanggal: '2025-04-28', pelanggan: 'Hendra Pratama', sales: 'Siti Aminah', total_harga: 1100000000 }
+];
+const dummy_bayar = [
+  { id_pembayaran: 5001, tgl_bayar: '2025-05-02', jumlah_pembayaran: 450000000, metode: 'Transfer', id_transaksi: 1001, id_mobil: 1 },
+  { id_pembayaran: 5002, tgl_bayar: '2025-05-01', jumlah_pembayaran: 240000000, metode: 'Cash', id_transaksi: 1002, id_mobil: 5 }
+];
+const dummy_stok = [
+  { id_stok: 1, jumlah: 10, tanggal_masuk: '2024-01-15', supplier: 'PT Auto Prima' },
+  { id_stok: 2, jumlah: 5, tanggal_masuk: '2024-02-20', supplier: 'CV Mobil Jaya' }
+];
+const dummy_sales = [
+  { id_pegawai: 2, nama: 'Siti Aminah', target_penjualan: 500000000, komisi: 25000000, pencapaian: 78, jml_trx: 12 },
+  { id_pegawai: 3, nama: 'Joko Susanto', target_penjualan: 400000000, komisi: 20000000, pencapaian: 45, jml_trx: 8 }
+];
+const dummy_supplier = [
+  { id_supplier: 1, nama_supplier: 'PT Auto Prima', jalan: 'Jl. Sudirman No.1', kota: 'Jakarta', kode_pos: '10110' },
+  { id_supplier: 2, nama_supplier: 'CV Mobil Jaya', jalan: 'Jl. Diponegoro No.5', kota: 'Bandung', kode_pos: '40115' }
+];
+async function getMobil_local() { return await getMobil(); }
+
+
+let data = [];
+let editIndex = -1;
+
+(async () => {
+  data = dummy_trx;
+  refresh();
+})();
+
+function refresh() {
+  renderTable('data-table', data, [
+      { key: 'id_transaksi' },
+      { key: 'tanggal' },
+      { key: 'pelanggan' },
+      { key: 'sales' },
+      { render: r => formatRupiah(r.total_harga) }
+    ],
+    (row) => `
+      <button class="btn btn-outline btn-sm" onclick="editRow(${data.indexOf(row)})">Edit</button>
+      <button class="btn btn-danger btn-sm" onclick="delRow(${data.indexOf(row)})">Hapus</button>
+    `
+  );
+}
+
+function openForm() {
+  editIndex = -1;
+  document.getElementById('modal-title').textContent = 'Tambah Data';
+  document.getElementById('form-data').reset();
+  openModal('modal-form');
+}
+
+function editRow(i) {
+  editIndex = i;
+  document.getElementById('modal-title').textContent = 'Edit Data';
+  const form = document.getElementById('form-data');
+  Object.entries(data[i]).forEach(([k, v]) => {
+    if (form[k]) form[k].value = v;
+  });
+  openModal('modal-form');
+}
+
+function delRow(i) {
+  if (!confirm('Yakin hapus data ini?')) return;
+  data.splice(i, 1);
+  refresh();
+}
+
+document.getElementById('form-data').addEventListener('submit', e => {
+  e.preventDefault();
+  const formData = Object.fromEntries(new FormData(e.target));
+  if (editIndex >= 0) {
+    data[editIndex] = { ...data[editIndex], ...formData };
+  } else {
+    data.push(formData);
+  }
+  closeModal('modal-form');
+  refresh();
+});
+</script>
+</body>
+</html>

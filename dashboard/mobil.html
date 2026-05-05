@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manajemen Mobil — Auro Motors</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/dashboard.css">
+<style>
+  /* Style preview gambar upload */
+  .img-preview-wrap {
+    margin-top: .5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .img-preview {
+    width: 120px; height: 80px;
+    object-fit: cover;
+    border: 1px solid #333;
+    border-radius: 6px;
+    background: #111;
+  }
+  .img-hint { font-size: .8rem; color: #888; }
+  .car-thumb { width: 60px; height: 40px; object-fit: cover; border-radius: 4px; }
+</style>
+</head>
+<body>
+<div class="dashboard-wrap">
+  <aside class="sidebar">
+    <div class="logo">AURO ADMIN</div>
+    <ul class="sidebar-menu">
+      <li><a href="index.html"><span class="icon">📊</span>Dashboard</a></li>
+      <li><a href="mobil.html" class="active"><span class="icon">🚗</span>Mobil</a></li>
+      <li><a href="pelanggan.html"><span class="icon">👥</span>Pelanggan</a></li>
+      <li><a href="transaksi.html"><span class="icon">💼</span>Transaksi</a></li>
+      <li><a href="pembayaran.html"><span class="icon">💳</span>Pembayaran</a></li>
+      <li><a href="stok.html"><span class="icon">📦</span>Stok</a></li>
+      <li><a href="sales.html"><span class="icon">🏆</span>Sales</a></li>
+      <li><a href="supplier.html"><span class="icon">🏭</span>Supplier</a></li>
+    </ul>
+    <div class="sidebar-logout">
+      <a href="#" onclick="logout();return false;"><span class="icon">🚪</span>Keluar</a>
+    </div>
+  </aside>
+  <main class="main-content">
+    <div class="dash-header">
+      <h1>🚗 Manajemen Mobil</h1>
+      <button class="btn btn-primary" onclick="openForm()">+ Tambah</button>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-header"><h3>Daftar Data</h3></div>
+      <table class="data-table" id="data-table">
+        <thead><tr><th>Foto</th><th>ID</th><th>Merk</th><th>Tipe</th><th>Warna</th><th>Tahun</th><th>Harga</th><th>Kondisi</th><th>Stok</th><th>Aksi</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL FORM -->
+<div class="modal-overlay" id="modal-form">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">Tambah Data</h3>
+      <button class="modal-close" onclick="closeModal('modal-form')">&times;</button>
+    </div>
+    <form id="form-data">
+      <div class="modal-body">
+        <div class="form-group"><label>ID Mobil</label><input type="number" name="id_mobil" required></div>
+        <div class="form-group"><label>Merk</label><input type="text" name="merk" required></div>
+        <div class="form-group"><label>Tipe</label><input type="text" name="tipe" required></div>
+        <div class="form-group"><label>Warna</label><input type="text" name="warna"></div>
+        <div class="form-group"><label>Tahun</label><input type="number" name="tahun"></div>
+        <div class="form-group"><label>Harga</label><input type="number" name="harga"></div>
+        <div class="form-group">
+          <label>Kondisi</label>
+          <select name="kondisi"><option value="Baru">Baru</option><option value="Bekas">Bekas</option></select>
+        </div>
+        <div class="form-group"><label>Garansi</label><input type="text" name="garansi"></div>
+
+        <!-- ===== INPUT GAMBAR MOBIL ===== -->
+        <div class="form-group">
+          <label>Foto Mobil</label>
+          <input type="file" id="input-gambar" name="gambar_file" accept="image/*" onchange="handleGambarChange(event)">
+          <!-- Field tersembunyi untuk menyimpan data base64 / URL gambar -->
+          <input type="hidden" name="gambar" id="input-gambar-data">
+          <div class="img-preview-wrap">
+            <img id="img-preview" class="img-preview" src="https://placehold.co/120x80/111111/FFD700" alt="Preview">
+            <div>
+              <div class="img-hint">Format: JPG / PNG. Maks ~2 MB.</div>
+              <button type="button" class="btn btn-outline btn-sm" style="margin-top:.4rem" onclick="clearGambar()">Hapus Foto</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline btn-sm" onclick="closeModal('modal-form')">Batal</button>
+        <button type="submit" class="btn btn-primary btn-sm">Simpan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="../assets/js/main.js"></script>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/dashboard.js"></script>
+<script>
+let data = [];
+let editIndex = -1;
+const PLACEHOLDER_THUMB = 'https://placehold.co/120x80/111111/FFD700';
+
+(async () => {
+  data = await getMobil();
+  refresh();
+})();
+
+function refresh() {
+  renderTable('data-table', data, [
+      { render: r => `<img class="car-thumb" src="${r.gambar || PLACEHOLDER_THUMB}" alt="">` },
+      { key: 'id_mobil' },
+      { key: 'merk' },
+      { key: 'tipe' },
+      { key: 'warna' },
+      { key: 'tahun' },
+      { render: r => formatRupiah(r.harga) },
+      { key: 'kondisi' },
+      { key: 'stok' }
+    ],
+    (row) => `
+      <button class="btn btn-outline btn-sm" onclick="editRow(${data.indexOf(row)})">Edit</button>
+      <button class="btn btn-danger btn-sm" onclick="delRow(${data.indexOf(row)})">Hapus</button>
+    `
+  );
+}
+
+/* ===== Buka form Tambah ===== */
+function openForm() {
+  editIndex = -1;
+  document.getElementById('modal-title').textContent = 'Tambah Data';
+  document.getElementById('form-data').reset();
+  // Reset preview gambar
+  document.getElementById('input-gambar-data').value = '';
+  document.getElementById('img-preview').src = PLACEHOLDER_THUMB;
+  openModal('modal-form');
+}
+
+/* ===== Buka form Edit, isi data termasuk gambar ===== */
+function editRow(i) {
+  editIndex = i;
+  document.getElementById('modal-title').textContent = 'Edit Data';
+  const form = document.getElementById('form-data');
+  form.reset();
+  Object.entries(data[i]).forEach(([k, v]) => {
+    if (form[k]) form[k].value = v ?? '';
+  });
+  // Pre-fill preview gambar dari data yang sudah ada
+  const gbr = data[i].gambar || '';
+  document.getElementById('input-gambar-data').value = gbr;
+  document.getElementById('img-preview').src = gbr || PLACEHOLDER_THUMB;
+  openModal('modal-form');
+}
+
+function delRow(i) {
+  if (!confirm('Yakin hapus data ini?')) return;
+  data.splice(i, 1);
+  saveStoredMobil(data);
+  refresh();
+}
+
+/* ===== Handle file input -> baca jadi base64 untuk preview & simpan ===== */
+function handleGambarChange(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) {
+    alert('Ukuran file maksimal 2 MB');
+    e.target.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const dataUrl = ev.target.result;
+    document.getElementById('img-preview').src = dataUrl;
+    document.getElementById('input-gambar-data').value = dataUrl;
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ===== Hapus gambar yang sudah dipilih ===== */
+function clearGambar() {
+  document.getElementById('input-gambar').value = '';
+  document.getElementById('input-gambar-data').value = '';
+  document.getElementById('img-preview').src = PLACEHOLDER_THUMB;
+}
+
+/* ===== Submit form ===== */
+document.getElementById('form-data').addEventListener('submit', async e => {
+  e.preventDefault();
+  const formData = Object.fromEntries(new FormData(e.target));
+  // Hapus field file mentah, gunakan field hidden 'gambar' (base64 / URL)
+  delete formData.gambar_file;
+
+  if (editIndex >= 0) {
+    data[editIndex] = { ...data[editIndex], ...formData };
+    saveStoredMobil(data);
+    // Kirim ke API (PUT) — diabaikan jika API belum aktif
+    try { await apiPut('mobil.php', data[editIndex]); } catch (_) {}
+  } else {
+    data.push(formData);
+    saveStoredMobil(data);
+    try { await apiPost('mobil.php', formData); } catch (_) {}
+  }
+  closeModal('modal-form');
+  refresh();
+});
+</script>
+</body>
+</html>

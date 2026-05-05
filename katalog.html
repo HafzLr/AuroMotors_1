@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Katalog Mobil — Auro Motors</title>
+<meta name="description" content="Telusuri katalog lengkap mobil baru dan bekas premium kami.">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="logo">AURO MOTORS</a>
+    <button class="nav-toggle" onclick="toggleNav()">☰</button>
+    <ul class="nav-links">
+      <li><a href="index.html">Beranda</a></li>
+      <li><a href="katalog.html">Katalog</a></li>
+      <li><a href="login.html" class="btn btn-outline btn-sm">Login</a></li>
+    </ul>
+  </div>
+</nav>
+
+<section class="container" style="padding-top:3rem">
+  <h1 class="section-title">Katalog Mobil</h1>
+  <p class="section-subtitle">Temukan mobil impian Anda</p>
+
+  <!-- FILTER -->
+  <div class="filter-bar">
+    <select id="f-kondisi"><option value="">Semua Kondisi</option><option value="Baru">Baru</option><option value="Bekas">Bekas</option></select>
+    <input id="f-merk" placeholder="Merk (cth: Toyota)">
+    <input id="f-min" type="number" placeholder="Harga min">
+    <input id="f-max" type="number" placeholder="Harga max">
+    <input id="f-tahun" type="number" placeholder="Tahun">
+    <button class="btn btn-primary" onclick="applyFilter()">Filter</button>
+  </div>
+
+  <div id="catalog" class="car-grid"></div>
+  <div id="pagination" class="pagination"></div>
+</section>
+
+<footer class="footer">
+  <div class="footer-bottom">© 2025 Auro Motors. Hak Cipta Dilindungi.</div>
+</footer>
+
+<script src="assets/js/main.js"></script>
+<script src="assets/js/api.js"></script>
+<script>
+let allCars = [];
+let filtered = [];
+let currentPage = 1;
+const PER_PAGE = 9;
+
+(async () => {
+  allCars = await getMobil();
+  // Pre-fill filter from URL
+  const params = new URLSearchParams(location.search);
+  if (params.get('kondisi')) document.getElementById('f-kondisi').value = params.get('kondisi');
+  applyFilter();
+})();
+
+function applyFilter() {
+  const k = document.getElementById('f-kondisi').value;
+  const merk = document.getElementById('f-merk').value.toLowerCase();
+  const min = parseFloat(document.getElementById('f-min').value) || 0;
+  const max = parseFloat(document.getElementById('f-max').value) || Infinity;
+  const tahun = document.getElementById('f-tahun').value;
+  filtered = allCars.filter(m =>
+    (!k || m.kondisi === k) &&
+    (!merk || m.merk.toLowerCase().includes(merk)) &&
+    (m.harga >= min && m.harga <= max) &&
+    (!tahun || m.tahun == tahun)
+  );
+  currentPage = 1;
+  render();
+}
+
+function render() {
+  const start = (currentPage - 1) * PER_PAGE;
+  const pageData = filtered.slice(start, start + PER_PAGE);
+  const wrap = document.getElementById('catalog');
+  if (pageData.length === 0) {
+    wrap.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:3rem">Tidak ada mobil yang cocok dengan filter Anda.</p>';
+  } else {
+    wrap.innerHTML = pageData.map(renderCarCard).join('');
+  }
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
+  const pag = document.getElementById('pagination');
+  let buttons = '';
+  for (let i = 1; i <= totalPages; i++) {
+    buttons += `<button class="${i === currentPage ? 'active' : ''}" onclick="goPage(${i})">${i}</button>`;
+  }
+  pag.innerHTML = totalPages > 1 ? buttons : '';
+}
+function goPage(n) { currentPage = n; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+</script>
+</body>
+</html>
