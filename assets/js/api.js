@@ -5,7 +5,6 @@
 // GANTI dengan URL server PHP Anda
 const API_BASE = 'https://api.yourdomain.com';
 // Contoh untuk lokal: 'http://localhost/showroom/api'
-const STORAGE_MOBIL_KEY = 'showroom_mobil_data';
 
 async function apiGet(endpoint, params = {}) {
   const url = new URL(`${API_BASE}/${endpoint}`);
@@ -16,24 +15,6 @@ async function apiGet(endpoint, params = {}) {
   } catch (e) {
     console.error('API GET error:', e);
     return { error: 'Gagal terhubung ke server' };
-  }
-}
-
-function loadStoredMobil() {
-  try {
-    const raw = localStorage.getItem(STORAGE_MOBIL_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch (e) {
-    console.warn('Gagal membaca data lokal mobil:', e);
-    return null;
-  }
-}
-
-function saveStoredMobil(data) {
-  try {
-    localStorage.setItem(STORAGE_MOBIL_KEY, JSON.stringify(data));
-  } catch (e) {
-    console.warn('Gagal menyimpan data lokal mobil:', e);
   }
 }
 
@@ -66,6 +47,27 @@ function authHeaders() {
   return token ? { 'Authorization': 'Bearer ' + token } : {};
 }
 
+const STORAGE_MOBIL_KEY = 'showroom_mobil_data';
+
+function loadStoredMobil() {
+  try {
+    const raw = localStorage.getItem(STORAGE_MOBIL_KEY);
+    const data = raw ? JSON.parse(raw) : null;
+    return Array.isArray(data) ? data : null;
+  } catch (e) {
+    console.warn('Gagal membaca data local mobil:', e);
+    return null;
+  }
+}
+
+function saveStoredMobil(data) {
+  try {
+    localStorage.setItem(STORAGE_MOBIL_KEY, JSON.stringify(data));
+  } catch (e) {
+    console.warn('Gagal menyimpan data local mobil:', e);
+  }
+}
+
 // Data dummy fallback ketika API belum tersedia (untuk demo statis di GitHub Pages)
 const DUMMY_MOBIL = [
   { id_mobil: 1, merk: 'Toyota', tipe: 'Innova Zenix', warna: 'Hitam', harga: 450000000, tahun: 2024, kondisi: 'Baru', garansi: 'Garansi Resmi 3 Tahun', nama_supplier: 'PT Auto Prima', stok: 5 },
@@ -81,9 +83,7 @@ async function getMobil(params = {}) {
   const res = await apiGet('mobil.php', params);
   if (res.error || !Array.isArray(res)) {
     const stored = loadStoredMobil();
-    if (stored && Array.isArray(stored) && stored.length) {
-      return stored;
-    }
+    if (stored) return stored;
     console.warn('Menggunakan data dummy karena API tidak tersedia');
     return DUMMY_MOBIL;
   }
@@ -94,7 +94,7 @@ async function getMobilById(id) {
   const res = await apiGet('mobil.php', { id });
   if (res.error || !res.id_mobil) {
     const stored = loadStoredMobil();
-    if (stored && Array.isArray(stored)) {
+    if (stored) {
       const found = stored.find(m => m.id_mobil == id);
       if (found) return found;
     }
